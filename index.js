@@ -28,6 +28,16 @@ let persons = [
 
 app.use(express.json());
 
+app.get('/info', (req, res) => {
+	const page = `<p>Phonebook has info for ${
+		persons.length
+	} people</p><p>${new Intl.DateTimeFormat('en-GB', {
+		dateStyle: 'full',
+		timeStyle: 'long',
+	}).format(new Date())}</p>`;
+	res.status(200).send(page);
+});
+
 app.get('/api/persons', (req, res) => {
 	return res.json(persons);
 });
