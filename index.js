@@ -66,6 +66,20 @@ app.delete('/api/persons/:id', (req, res) => {
 app.post('/api/persons', (req, res) => {
 	const id = Math.floor(Math.random() * 1000);
 	const { name, number } = req.body;
+	if (!name || !number) {
+		return res
+			.status(400)
+			.send({ error: 'A name and number is required' });
+	}
+	// check for unique name
+	const isNameUnique = persons.find(
+		(person) => person.name.toLowerCase() === name.toLowerCase()
+	);
+
+	if (!isNameUnique) {
+		return res.status(400).send({ error: 'name must be unique' });
+	}
+
 	persons.push({ id, name, number });
 	res
 		.status(200)
