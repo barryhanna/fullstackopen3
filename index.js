@@ -52,6 +52,17 @@ app.get('/api/persons/:id', (req, res) => {
 	res.status(404).end('Person with that id was not found');
 });
 
+app.delete('/api/persons/:id', (req, res) => {
+	const id = Number(req.params.id);
+	const originalTotal = persons.length;
+	persons = persons.filter((person) => id !== person.id);
+	const message =
+		originalTotal === persons.length
+			? `Person not found.`
+			: `Person was removed from phonebook`;
+	res.status(200).send({ message });
+});
+
 app.listen(PORT, () => {
 	console.log(`Listening on port: ${PORT}`);
 });
