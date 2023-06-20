@@ -63,6 +63,15 @@ app.delete('/api/persons/:id', (req, res) => {
 	res.status(200).send({ message });
 });
 
+app.post('/api/persons', (req, res) => {
+	const id = Math.floor(Math.random() * 1000);
+	const { name, number } = req.body;
+	persons.push({ id, name, number });
+	res
+		.status(200)
+		.send({ message: `${name} - ${number} added to phonebook` });
+});
+
 app.listen(PORT, () => {
 	console.log(`Listening on port: ${PORT}`);
 });
