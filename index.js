@@ -84,27 +84,29 @@ app.delete('/api/persons/:id', (req, res) => {
 	res.status(200).send({ message });
 });
 
-app.post('/api/persons', (req, res) => {
-	const id = Math.floor(Math.random() * 1000);
+app.post('/api/persons', async (req, res) => {
 	const { name, number } = req.body;
 	if (!name || !number) {
 		return res
 			.status(400)
 			.send({ error: 'A name and number is required' });
 	}
-	// check for unique name
-	const isNameUnique = persons.find(
-		(person) => person.name.toLowerCase() === name.toLowerCase()
-	);
 
-	if (!isNameUnique) {
+	// check for unique name
+	const result = await Person.findOne({ name: name }).exec();
+
+	if (result) {
 		return res.status(400).send({ error: 'name must be unique' });
 	}
 
-	persons.push({ id, name, number });
-	res
-		.status(200)
-		.send({ message: `${name} - ${number} added to phonebook` });
+	const newPerson = new Person({
+		name,
+		number,
+	});
+
+	newPerson.save().then((result) => {
+		return res.json(result);
+	});
 });
 
 const unknownEndpoint = (req, res) => {
