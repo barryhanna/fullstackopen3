@@ -73,6 +73,21 @@ app.get('/api/persons/:id', (req, res) => {
 	res.status(404).end('Person with that id was not found');
 });
 
+app.put('/api/persons/:id', async (req, res) => {
+	const newNote = {
+		name: req.body.name,
+		number: req.body.number,
+	};
+	const updatedPerson = await Person.findByIdAndUpdate(
+		req.params.id,
+		newNote,
+		{
+			new: true,
+		}
+	);
+	res.json(updatedPerson);
+});
+
 app.delete('/api/persons/:id', async (req, res) => {
 	const result = await Person.findByIdAndRemove(req.params.id);
 	res.status(204).end();
