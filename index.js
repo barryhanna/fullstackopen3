@@ -47,13 +47,15 @@ app.use(
 	})
 );
 
-app.get('/info', (req, res) => {
-	const page = `<p>Phonebook has info for ${
-		persons.length
-	} people</p><p>${new Intl.DateTimeFormat('en-GB', {
-		dateStyle: 'full',
-		timeStyle: 'long',
-	}).format(new Date())}</p>`;
+app.get('/info', async (req, res) => {
+	const numEntries = await Person.find({}).count();
+	const page = `<p>Phonebook has info for ${numEntries} people</p><p>${new Intl.DateTimeFormat(
+		'en-GB',
+		{
+			dateStyle: 'full',
+			timeStyle: 'long',
+		}
+	).format(new Date())}</p>`;
 	res.status(200).send(page);
 });
 
@@ -63,14 +65,12 @@ app.get('/api/persons', (req, res) => {
 	});
 });
 
-app.get('/api/persons/:id', (req, res) => {
-	const id = Number(req.params.id);
-	const person = persons.find((person) => person.id === id);
-
-	if (person) {
-		return res.status(200).send(person);
+app.get('/api/persons/:id', async (req, res, next) => {
+	const person = await Person.findById(req.params.id);
+	if (!person) {
+		return next({ message: 'No person found with that id' });
 	}
-	res.status(404).end('Person with that id was not found');
+	return res.json(person);
 });
 
 app.put('/api/persons/:id', async (req, res) => {
