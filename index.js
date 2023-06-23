@@ -73,15 +73,9 @@ app.get('/api/persons/:id', (req, res) => {
 	res.status(404).end('Person with that id was not found');
 });
 
-app.delete('/api/persons/:id', (req, res) => {
-	const id = Number(req.params.id);
-	const originalTotal = persons.length;
-	persons = persons.filter((person) => id !== person.id);
-	const message =
-		originalTotal === persons.length
-			? `Person not found.`
-			: `Person was removed from phonebook`;
-	res.status(200).send({ message });
+app.delete('/api/persons/:id', async (req, res) => {
+	const result = await Person.findByIdAndRemove(req.params.id);
+	res.status(204).end();
 });
 
 app.post('/api/persons', async (req, res) => {
@@ -114,6 +108,16 @@ const unknownEndpoint = (req, res) => {
 };
 
 app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
+	console.log(error);
+	if (error.name === 'CastError') {
+		res.status(400).send({ error: 'malformatted id' });
+	}
+	next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 
