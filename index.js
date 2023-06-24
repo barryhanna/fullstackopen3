@@ -83,6 +83,8 @@ app.put('/api/persons/:id', async (req, res) => {
 		newNote,
 		{
 			new: true,
+			runValidators: true,
+			content: 'query',
 		}
 	);
 	res.json(updatedPerson);
@@ -93,7 +95,7 @@ app.delete('/api/persons/:id', async (req, res) => {
 	res.status(204).end();
 });
 
-app.post('/api/persons', async (req, res) => {
+app.post('/api/persons', async (req, res, next) => {
 	const { name, number } = req.body;
 	if (!name || !number) {
 		return res
@@ -113,9 +115,14 @@ app.post('/api/persons', async (req, res) => {
 		number,
 	});
 
-	newPerson.save().then((result) => {
-		return res.json(result);
-	});
+	newPerson
+		.save()
+		.then((result) => {
+			return res.json(result);
+		})
+		.catch((err) => {
+			next(err);
+		});
 });
 
 const unknownEndpoint = (req, res) => {
@@ -125,9 +132,11 @@ const unknownEndpoint = (req, res) => {
 app.use(unknownEndpoint);
 
 const errorHandler = (error, req, res, next) => {
-	console.log(error);
+	console.log('error', error);
 	if (error.name === 'CastError') {
 		res.status(400).send({ error: 'malformatted id' });
+	} else if (error.name === 'ValidationError') {
+		return res.status(400).send({ error: error._message });
 	}
 	next(error);
 };
